@@ -56,7 +56,7 @@ sub BUILD
 	}
 
 	$self->rest_client->addHeader('Content-Type', 'application/json');
-	$self->rest_client->addHeader('authorization', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyIjp7ImlkIjo3NzYzNzgsImVtYWlsIjoiaWFuQGF0dG9uby5uZXQiLCJhcHBsaWNhdGlvbiI6MzkzNDB9fQ.GaDlQsQ7mQoo0-xJjAoDi7DRI9hckjfQric5KvwJpkMAa9l3Wu6kkbt6f_o2y41BfLpma0VZU23pDkt6rAGUsg');
+	$self->rest_client->addHeader('authorization', 'Bearer '.$self->oauth_token);
 
 }
 
