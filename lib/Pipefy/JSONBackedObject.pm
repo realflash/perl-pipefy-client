@@ -1,4 +1,4 @@
-package HubSpot::JSONBackedObject;
+package Pipefy::JSONBackedObject;
 our $VERSION = "0.1";
 use open qw/:std :utf8/;	# tell perl that stdout, stdin and stderr is in utf8
 use strict;
@@ -19,7 +19,7 @@ sub BUILD
 	if(defined($args->{'json'}))
 	{
 		# Not actually JSON but a perl object derived from the JSON response
-		$self->json($args->{'json'});
+		$self->json($args->{'json'}->{'data'});
 	}
 	
 	if(defined($self->json->{'properties'}))
