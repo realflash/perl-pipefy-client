@@ -9,7 +9,7 @@ BEGIN {}
 
 my $pipefy_oauth_token = $ENV{'PIPEFY_OAUTH_TOKEN'};
 SKIP: {
-	skip "Environment variable PIPEFY_OAUTH_TOKEN not defined; skipping tests", 1 if length $pipefy_oauth_token < 1;
+	skip "Environment variable PIPEFY_OAUTH_TOKEN not defined; skipping tests", 1 if !defined($pipefy_oauth_token);
 
 	# Client object is created OK
 	ok(sub {Pipefy::Client->new({ oauth_token => $pipefy_oauth_token })}, "Client creation");
