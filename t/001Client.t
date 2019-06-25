@@ -16,6 +16,7 @@ SKIP: {
 
 	my $client = Pipefy::Client->new({ oauth_token => $pipefy_oauth_token });
 	my $user = $client->me();
-	print Dumper $user;
+	is(length($user->name) > 1, 1, "Checking property name is populated - '".$user->name."'");
+	is(length($user->email) > 1, 1, "Checking property email is populated - '".$user->email."'");
 }
 done_testing();

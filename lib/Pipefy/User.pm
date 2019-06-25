@@ -39,27 +39,24 @@ sub BUILD
 	
 	if($self->json)
 	{
-		$self->{'id'} = $self->json->{'vid'};
-		$self->{'firstName'} = $self->json->{'properties'}->{'firstname'}->{'value'};
-		$self->{'lastName'} = $self->json->{'properties'}->{'lastname'}->{'value'};
-		$self->{'company'} = $self->json->{'properties'}->{'company'}->{'value'};
-		$self->{'lastModifiedDateTime'} = DateTime->from_epoch(epoch => $self->json->{'properties'}->{'lastmodifieddate'}->{'value'}/1000, time_zone => 'UTC');
-		my $profiles = $self->json->{'identity-profiles'};
-		my $first_profile = $$profiles[0];						# other profiles may exist if it is a merged contact
-		my $identities = $first_profile->{'identities'};
-		my $found_email;
-		foreach my $identity (@$identities)
+		my $src;
+		if($self->json->{'me'})
 		{
-			if($identity->{'is-primary'} && $identity->{'type'} eq "EMAIL")
-			{
-				$found_email = $identity->{'value'};
-			}
+			$src = $self->json->{'me'};
 		}
-		if($found_email)
+		else
 		{
-			$self->{'primaryEmail'} = $found_email;
+			$src = $self->json;
 		}
-		# email isn't a compulsory field - might not be there
+
+		$self->{'id'} = $src->{'id'};
+		$self->{'createdAt'} = $src->{'created_at'};
+		$self->{'email'} = $src->{'email'};
+		$self->{'locale'} = $src->{'locale'};
+		$self->{'name'} = $src->{'name'};
+		$self->{'timeZone'} = $src->{'timeZone'};
+		$self->{'username'} = $src->{'username'};
+		#~ $self->{'lastModifiedDateTime'} = DateTime->from_epoch(epoch => $self->json->{'properties'}->{'lastmodifieddate'}->{'value'}/1000, time_zone => 'UTC');
 	}
 }
 

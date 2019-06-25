@@ -77,7 +77,7 @@ sub me
 	my $content = $self->_post("{ me { name, email }}");
 	#~ return undef if	$self->rest_client->responseCode =~ /^404$/;
 	my $result = $json->decode($content);
-	print Dumper $result;
+
 	return Pipefy::User->new({json => $result});
 }
 
@@ -90,7 +90,6 @@ sub _post
 	#~ $params->{'hapikey'} = $self->oauth_token;						# Include the API key in the parameters
 	$self->rest_client->POST($api_url, "{\"query\": \"$content\"}");	# Get it
 	$self->_checkResponse();											# Check it was successful
-	print Dumper $self->rest_client;
 	return $self->rest_client->responseContent();
 }
 	
