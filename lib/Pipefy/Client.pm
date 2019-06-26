@@ -56,6 +56,7 @@ Returns: new instance of this class.
 sub BUILD
 {
 	my $self = shift;
+	print Dumper $self;
 	
 	# Create ourselves a rest client to use
 	$self->{'rest_client'} = REST::Client->new({ timeout => 20, follow => 1 });
@@ -65,7 +66,15 @@ sub BUILD
 	}
 	if(length($self->{'oauthToken'}) < 1)
 	{
-		die("oauthToken not specified, length '".$self->{'oauthToken'}."'");
+		die("oauthToken not specified");
+	}
+	if(length($self->{'organizationId'}) > 0 && $self->{'organizationId'} !~ /[0-9]{3,}/)
+	{
+		die("organizationId doesn't look right. Should be a numeric string (3+ digits). You specified '".$self->{'oauthToken'}."'");
+	}
+	if(length($self->{'organizationId'}) < 1)
+	{
+		die("organizationId not specified");
 	}
 
 	$self->rest_client->addHeader('Content-Type', 'application/json');
@@ -107,7 +116,9 @@ sub databases
 {
 	my $self = shift;
 	
-	my $content = $self->_post("{ organization: ".$self->organizationId." }");
+	my $query = '{ organization(id: "'.$self->organizationId.'") { id }}';
+	print Dumper $query;
+	my $content = $self->_post($query);
 	my $result = $json->decode($content);
 	print Dumper $result;
 	#~ return Pipefy::Table->new({json => $result});
