@@ -8,6 +8,7 @@ use REST::Client;
 use Data::Dumper;
 use JSON;
 use Pipefy::User;
+use Pipefy::Database;
 
 =pod
 
@@ -17,7 +18,7 @@ Pipefy::Client -- An object that can be used to manipulate the Pipefy API
 
 =head1 SYNOPSIS
 
- my $client = Pipefy::Client->new({ oauth_token => $pipefy_oauth_token }); 
+ my $client = Pipefy::Client->new({ oauthToken => $pipefy_oauthToken }); 
  # Retrieve 50 contacts
  my $contacts = $client->contacts(50);
 
@@ -32,7 +33,7 @@ At the moment you can only retrieve read-only representations of contact objects
 =cut
 
 # Make us a class
-use Class::Tiny qw(rest_client oauth_token hub_id),
+use Class::Tiny qw(rest_client oauthToken organizationId),
 {
 };
 
@@ -46,17 +47,17 @@ sub BUILD
 	
 	# Create ourselves a rest client to use
 	$self->rest_client(REST::Client->new({ timeout => 20, follow => 1 }));
-	if(length($self->{'oauth_token'}) > 0 && $self->{'oauth_token'} !~ /[0-9a-fA-F_\-\.]+/)
+	if(length($self->{'oauthToken'}) > 0 && $self->{'oauthToken'} !~ /[0-9a-fA-F_\-\.]+/)
 	{
-		die("oauth_token doesn't look right. Should be a long alphanumeric string (200+ characters). You specified '".$self->{'oauth_token'}."'. To use the Pipefy demo account, don't specify oauth_token at all.");
+		die("oauthToken doesn't look right. Should be a long alphanumeric string (200+ characters). You specified '".$self->{'oauthToken'}."'. To use the Pipefy demo account, don't specify oauthToken at all.");
 	}
-	if(length($self->{'oauth_token'}) < 1)
+	if(length($self->{'oauthToken'}) < 1)
 	{
-		die("oauth_token not specified");
+		die("oauthToken not specified");
 	}
 
 	$self->rest_client->addHeader('Content-Type', 'application/json');
-	$self->rest_client->addHeader('authorization', 'Bearer '.$self->oauth_token);
+	$self->rest_client->addHeader('authorization', 'Bearer '.$self->oauthToken);
 
 }
 
@@ -64,7 +65,7 @@ sub BUILD
 
 Retrieve details about the account which owns the oauth token you have provided. Good for testing that all is well.
 
- my $contact = $client->contact_by_id('897654');owner 
+ my $contact = $client->contact_by_id('897654');
 
 Returns: L<Pipefy::Contact>, or undef if the contact wasn't found.
 
@@ -75,10 +76,29 @@ sub me
 	my $self = shift;
 	
 	my $content = $self->_post("{ me { name, email }}");
-	#~ return undef if	$self->rest_client->responseCode =~ /^404$/;
 	my $result = $json->decode($content);
 
 	return Pipefy::User->new({json => $result});
+}
+
+=item databases()
+
+Retrieve all the databases available for writing to
+
+ my $db = $client->databases(); 
+
+Returns: an array ref of L<Pipefy::Database>, or undef if there are none.
+
+=cut
+
+sub databases
+{
+	my $self = shift;
+	
+	my $content = $self->_post("{ organization: ".$self->organizationId." }");
+	my $result = $json->decode($content);
+
+	return Pipefy::Table->new({json => $result});
 }
 
 sub _post
@@ -87,7 +107,7 @@ sub _post
 	my $content = shift;
 	
 	#~ $params = {} unless defined $params;								# In case no parameters have been specified
-	#~ $params->{'hapikey'} = $self->oauth_token;						# Include the API key in the parameters
+	#~ $params->{'hapikey'} = $self->oauthToken;						# Include the API key in the parameters
 	$self->rest_client->POST($api_url, "{\"query\": \"$content\"}");	# Get it
 	$self->_checkResponse();											# Check it was successful
 	return $self->rest_client->responseContent();

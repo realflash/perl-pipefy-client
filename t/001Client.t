@@ -8,11 +8,13 @@ use Data::Dumper;
 BEGIN {}
 
 my $pipefy_oauth_token = $ENV{'PIPEFY_OAUTH_TOKEN'};
+my $pipefy_org_id = $ENV{'PIPEFY_ORGANIZATION_ID'};
 SKIP: {
-	skip "Environment variable PIPEFY_OAUTH_TOKEN not defined; skipping tests", 1 if !defined($pipefy_oauth_token);
+	skip "Environment variable PIPEFY_OAUTH_TOKEN not defined; skipping tests", 1 if !defined($pipefy_oauth_token) ;
+	skip "Environment variable PIPEFY_ORGANIZATION_ID not defined; skipping tests", 1 if !defined($pipefy_org_id) ;
 
 	# Client object is created OK
-	ok(sub {Pipefy::Client->new({ oauth_token => $pipefy_oauth_token })}, "Client creation");
+	ok(sub {Pipefy::Client->new({ oauth_token => $pipefy_oauth_token, org_id => $pipefy_org_id })}, "Client creation");
 
 	my $client = Pipefy::Client->new({ oauth_token => $pipefy_oauth_token });
 	my $user = $client->me();
