@@ -18,7 +18,7 @@ Pipefy::Client -- An object that can be used to manipulate the Pipefy API
 
 =head1 SYNOPSIS
 
- my $client = Pipefy::Client->new({ oauthToken => $pipefy_oauthToken }); 
+ my $client = Pipefy::Client->new({ oauthToken => $pipefy_oauth_token, organizationId => $pipefy_org_id }); 
  # Retrieve 50 contacts
  my $contacts = $client->contacts(50);
 
@@ -41,19 +41,31 @@ use Class::Tiny qw(rest_client oauthToken organizationId),
 my $api_url = 'https://api.pipefy.com/graphql';
 my $json = JSON->new;
 
+=pod
+
+=over 4
+
+=item new({oauthToken => <oauth_token>, organizationId => <org_id> }) (constructor)
+
+This class is what you use to perform actions against the API. Once you have created an instance of this object, you can call the other methods below on it. You can create a token by logging in to Pipefy and then going to L<https://app.pipefy.com/tokens>. You can find your org ID by going to your Pipefy front page andlooking at the URL, which will look similar to I<https://app.pipefy.com/organizations/948320>. where I<948320> is the org ID.
+
+Returns: new instance of this class.
+
+=cut
+
 sub BUILD
 {
 	my $self = shift;
 	
 	# Create ourselves a rest client to use
-	$self->rest_client(REST::Client->new({ timeout => 20, follow => 1 }));
+	$self->{'rest_client'} = REST::Client->new({ timeout => 20, follow => 1 });
 	if(length($self->{'oauthToken'}) > 0 && $self->{'oauthToken'} !~ /[0-9a-fA-F_\-\.]+/)
 	{
 		die("oauthToken doesn't look right. Should be a long alphanumeric string (200+ characters). You specified '".$self->{'oauthToken'}."'. To use the Pipefy demo account, don't specify oauthToken at all.");
 	}
 	if(length($self->{'oauthToken'}) < 1)
 	{
-		die("oauthToken not specified");
+		die("oauthToken not specified, length '".$self->{'oauthToken'}."'");
 	}
 
 	$self->rest_client->addHeader('Content-Type', 'application/json');
@@ -65,9 +77,9 @@ sub BUILD
 
 Retrieve details about the account which owns the oauth token you have provided. Good for testing that all is well.
 
- my $contact = $client->contact_by_id('897654');
+ my $contact = $client->me();
 
-Returns: L<Pipefy::Contact>, or undef if the contact wasn't found.
+Returns: L<Pipefy::Contact>.
 
 =cut
 
@@ -97,8 +109,8 @@ sub databases
 	
 	my $content = $self->_post("{ organization: ".$self->organizationId." }");
 	my $result = $json->decode($content);
-
-	return Pipefy::Table->new({json => $result});
+	print Dumper $result;
+	#~ return Pipefy::Table->new({json => $result});
 }
 
 sub _post
